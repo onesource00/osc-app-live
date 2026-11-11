@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneSource Commercial — Dashboard (Minimal Sample)</title>
+<style>
+  :root{
+    --bg:#f7f7f4; --surface:#ffffff; --line:#e8e8e2; --line-soft:#efefea;
+    --ink:#17191d; --ink2:#5f6259; --ink3:#9a9c92;
+    --green:#83b726; --green-dark:#587d16; --green-tint:#f0f6e2;
+    --amber:#b97f14; --amber-bg:#fdf6e3; --red:#c93a32; --red-bg:#fdeeec;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,'Helvetica Neue',Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--sans); background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased}
+  .shell{display:flex; min-height:100vh}
+
+  /* ---------- sidebar ---------- */
+  .side{
+    width:224px; flex:0 0 224px; background:var(--surface); border-right:1px solid var(--line);
+    padding:20px 12px; display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+  }
+  .brand{display:flex; align-items:center; gap:9px; padding:0 10px 18px}
+  .brand img{height:26px; display:block}
+  .brand .n{font-size:13.5px; font-weight:650; letter-spacing:-.01em; line-height:1.2}
+  .brand .s{font-size:11px; color:var(--ink2)}
+  .nav{display:flex; flex-direction:column; gap:1px; margin-top:4px}
+  .nav a{
+    display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px;
+    color:var(--ink2); text-decoration:none; font-size:13.5px; font-weight:500;
+  }
+  .nav a svg{width:17px; height:17px; flex:0 0 17px; stroke-width:1.8}
+  .nav a:hover{background:#f4f4ef; color:var(--ink)}
+  .nav a.active{background:var(--green-tint); color:var(--green-dark); font-weight:600}
+  .nav a .cnt{margin-left:auto; font-size:11.5px; color:var(--ink3); font-variant-numeric:tabular-nums}
+  .nav a .cnt.alert{color:var(--red); font-weight:600}
+  .side .who{margin-top:auto; display:flex; align-items:center; gap:10px; padding:12px 10px 2px; border-top:1px solid var(--line-soft)}
+  .avatar{width:30px; height:30px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:650}
+  .who .n{font-size:13px; font-weight:600; line-height:1.25}
+  .who .r{font-size:11.5px; color:var(--ink2)}
+
+  /* ---------- main ---------- */
+  .main{flex:1; min-width:0; padding:28px 34px 40px; max-width:1240px}
+  .head{display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap}
+  .head h1{font-size:23px; font-weight:650; letter-spacing:-.02em}
+  .head p{color:var(--ink2); font-size:13.5px; margin-top:5px}
+  .head p b{color:var(--ink); font-weight:600}
+  .head .acts{margin-left:auto; display:flex; gap:8px; align-items:center}
+  .btn{
+    font:inherit; font-size:13px; font-weight:550; padding:8px 14px; border-radius:8px;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer;
+  }
+  .btn:hover{border-color:#d8d8d0}
+  .btn.primary{background:var(--green); border-color:var(--green); color:#fff; font-weight:600}
+  .btn.primary:hover{background:#76a51f}
+  .sampletag{font-size:11px; color:var(--ink2); background:#eee9da; border-radius:99px; padding:3px 9px; font-weight:550}
+
+  /* KPI row — one aligned row of quiet tiles */
+  .kpis{display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin:24px 0 8px}
+  .kpi{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:15px 16px 14px; box-shadow:0 1px 2px rgba(23,25,29,.03)}
+  .kpi .lab{font-size:11px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--ink3)}
+  .kpi .val{font-size:27px; font-weight:650; letter-spacing:-.02em; font-variant-numeric:tabular-nums; margin-top:7px}
+  .kpi .val small{font-size:15px; color:var(--ink3); font-weight:600}
+  .kpi .note{font-size:12px; color:var(--ink2); margin-top:3px}
+  .kpi.warn .val{color:var(--amber)}
+  .kpi.warn .note{color:var(--amber)}
+
+  /* content columns: cards used sparingly; lists breathe on the page */
+  .cols{display:grid; grid-template-columns:1.15fr .85fr; gap:28px; margin-top:22px; align-items:start}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px 20px 10px; box-shadow:0 1px 2px rgba(23,25,29,.03)}
+  .card + .card{margin-top:16px}
+  .secttl{display:flex; align-items:baseline; gap:10px; margin-bottom:6px}
+  .secttl h2{font-size:14.5px; font-weight:650; letter-spacing:-.01em}
+  .secttl .meta{margin-left:auto; font-size:12px; color:var(--ink3)}
+  .secttl a{font-size:12.5px; color:var(--green-dark); text-decoration:none; font-weight:550}
+  .plain h2{font-size:14.5px; font-weight:650; margin-bottom:6px}
+  .plain .secttl{margin-bottom:6px}
+
+  .item{display:flex; gap:11px; padding:10px 0; border-bottom:1px solid var(--line-soft); align-items:flex-start}
+  .item:last-child{border-bottom:none}
+  .dot{width:8px; height:8px; border-radius:50%; margin-top:6px; flex:0 0 8px}
+  .dot.r{background:var(--red)} .dot.a{background:#e3a008} .dot.g{background:var(--green)} .dot.n{background:#cfd0c8}
+  .item .tx{flex:1; min-width:0}
+  .item .a{font-size:13.5px; line-height:1.45}
+  .item .b{font-size:12px; color:var(--ink2); margin-top:1px}
+  .item .when{font-size:12px; color:var(--ink3); white-space:nowrap; font-variant-numeric:tabular-nums}
+  .item .amt{font-size:13.5px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap}
+
+  .task{display:flex; gap:11px; padding:10px 0; border-bottom:1px solid var(--line-soft); align-items:flex-start}
+  .task:last-child{border-bottom:none}
+  .chk{width:17px; height:17px; border-radius:50%; border:1.5px solid #cfd0c8; flex:0 0 17px; margin-top:1px; position:relative}
+  .chk.done{border-color:var(--green); background:var(--green)}
+  .chk.done::after{content:""; position:absolute; left:5px; top:2px; width:4px; height:8px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(42deg)}
+  .task .tx{flex:1}
+  .task .a{font-size:13.5px; line-height:1.45}
+  .task.done .a{color:var(--ink3); text-decoration:line-through}
+  .task .b{font-size:12px; color:var(--ink2); margin-top:1px}
+  .task .when{font-size:12px; color:var(--ink3); white-space:nowrap}
+
+  /* pipeline: simple stage rows, no chart chrome */
+  .stage{display:grid; grid-template-columns:86px 1fr 30px; align-items:center; gap:12px; padding:7px 0}
+  .stage .sl{font-size:12.5px; color:var(--ink2)}
+  .stage .track{height:6px; border-radius:99px; background:#eeeEE8; background:#eeeee8; overflow:hidden}
+  .stage .fill{height:100%; background:var(--green); border-radius:99px}
+  .stage .fill.dim{background:#c9ccc0}
+  .stage .sv{font-size:12.5px; font-weight:600; text-align:right; font-variant-numeric:tabular-nums}
+
+  @media (max-width:1180px){ .kpis{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:860px){
+    .side{display:none} .cols{grid-template-columns:1fr} .kpis{grid-template-columns:repeat(2,1fr)}
+    .main{padding:20px 16px 32px}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="side">
+    <div class="brand">
+      <img src="assets/osc-mark-DjrDm8YT.png" alt="OSC">
+      <div><div class="n">OneSource</div><div class="s">Commercial</div></div>
+    </div>
+    <nav class="nav">
+      <a class="active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.4"/><path d="M3.5 19.5c.7-3.1 2.9-4.8 5.5-4.8s4.8 1.7 5.5 4.8M16 5a3.4 3.4 0 0 1 0 6.5M20.5 19.5c-.4-2.4-1.6-3.9-3.4-4.5"/></svg>Contacts &amp; CRM<span class="cnt">12</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20.5h16M6 20.5v-12l6-4.5 6 4.5v12M10 20.5v-5h4v5"/></svg>Projects<span class="cnt">4</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.8h17M8 3v4M16 3v4"/></svg>Schedule</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6.5 3.5h8l4 4v13h-12zM14.5 3.5v4h4"/></svg>Estimating<span class="cnt">2</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8.5"/><path d="M12 6.5v11M15.3 9.4c-.6-.9-1.9-1.4-3.3-1.4-1.9 0-3.2.9-3.2 2.2 0 3.2 6.5 1.7 6.5 4.2 0 1.3-1.5 2.2-3.3 2.2-1.5 0-2.9-.5-3.5-1.5"/></svg>Money</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14.7 6.3a4.2 4.2 0 0 1 5.9 5.3L12.4 19.8a2.1 2.1 0 0 1-3 0l-4.6-4.6a2.1 2.1 0 0 1 0-3l8.2-8.2"/></svg>Work orders<span class="cnt">6</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3.5l6.5 2.8v5.2c0 4.2-2.8 7.8-6.5 9.3-3.7-1.5-6.5-5.1-6.5-9.3V6.3z"/><path d="M9.2 12l2 2 3.8-3.8"/></svg>Watchdog<span class="cnt alert">3</span></a>
+    </nav>
+    <div class="who">
+      <div class="avatar">JM</div>
+      <div><div class="n">Jordan Malave</div><div class="r">Owner</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="head">
+      <div>
+        <h1>Good afternoon, Jordan</h1>
+        <p>Wednesday, November 11 — you have <b>2 bids due this week</b> and <b>3 follow-ups overdue</b>. <span class="sampletag">Sample data</span></p>
+      </div>
+      <div class="acts">
+        <button class="btn">Run checks</button>
+        <button class="btn primary">New lead</button>
+      </div>
+    </div>
+
+    <section class="kpis">
+      <div class="kpi"><div class="lab">Active projects</div><div class="val">4</div><div class="note">2 in preconstruction</div></div>
+      <div class="kpi"><div class="lab">Open leads</div><div class="val">12</div><div class="note">3 new this week</div></div>
+      <div class="kpi"><div class="lab">Opportunities</div><div class="val">$486<small>K</small></div><div class="note">Across 9 open deals</div></div>
+      <div class="kpi"><div class="lab">Bids due this week</div><div class="val">2</div><div class="note">Next: Friday, Nov 13</div></div>
+      <div class="kpi warn"><div class="lab">Overdue follow-ups</div><div class="val">3</div><div class="note">Oldest is 4 days over</div></div>
+      <div class="kpi"><div class="lab">Outstanding pay apps</div><div class="val">$92.4<small>K</small></div><div class="note">2 awaiting payment</div></div>
+    </section>
+
+    <div class="cols">
+      <div>
+        <div class="card">
+          <div class="secttl"><h2>Watchdog</h2><a href="#">View all</a></div>
+          <div class="item"><span class="dot r"></span><div class="tx"><div class="a">Pay app outstanding 34 days — San Antonio Warehouse</div><div class="b">Flagged for Owner</div></div><span class="when">Critical</span></div>
+          <div class="item"><span class="dot a"></span><div class="tx"><div class="a">Missing daily log — yesterday, Crew 2</div><div class="b">Flagged for Project Manager</div></div><span class="when">Today</span></div>
+          <div class="item"><span class="dot a"></span><div class="tx"><div class="a">Lead untouched 8 days — Ortega Retail Group</div><div class="b">Flagged for Sales</div></div><span class="when">1h ago</span></div>
+          <div class="item"><span class="dot g"></span><div class="tx"><div class="a">Work order completed, unbilled 7 days — WO-00031</div><div class="b">Flagged for Operations Manager</div></div><span class="when">2h ago</span></div>
+        </div>
+
+        <div class="card">
+          <div class="secttl"><h2>Pipeline</h2><span class="meta">Construction track</span></div>
+          <div class="stage"><span class="sl">New lead</span><div class="track"><div class="fill" style="width:84%"></div></div><span class="sv">5</span></div>
+          <div class="stage"><span class="sl">Qualification</span><div class="track"><div class="fill" style="width:67%"></div></div><span class="sv">4</span></div>
+          <div class="stage"><span class="sl">Site visit</span><div class="track"><div class="fill" style="width:50%"></div></div><span class="sv">3</span></div>
+          <div class="stage"><span class="sl">Estimating</span><div class="track"><div class="fill" style="width:67%"></div></div><span class="sv">4</span></div>
+          <div class="stage"><span class="sl">Proposal</span><div class="track"><div class="fill" style="width:34%"></div></div><span class="sv">2</span></div>
+          <div class="stage"><span class="sl">Negotiation</span><div class="track"><div class="fill dim" style="width:17%"></div></div><span class="sv">1</span></div>
+        </div>
+      </div>
+
+      <div>
+        <section class="plain">
+          <div class="secttl"><h2>Your tasks</h2><a href="#">View all</a></div>
+          <div class="task"><span class="chk"></span><div class="tx"><div class="a">Approve Change Order 003 — San Antonio Tenant</div><div class="b">Money · awaiting your approval</div></div><span class="amt">$16,600</span></div>
+          <div class="task"><span class="chk"></span><div class="tx"><div class="a">Review the staged TeamHub import</div><div class="b">214 records staged</div></div><span class="when">Today</span></div>
+          <div class="task"><span class="chk"></span><div class="tx"><div class="a">Call back Ortega Retail — proposal follow-up</div><div class="b">CRM · day 5</div></div><span class="when">Thu 12</span></div>
+          <div class="task done"><span class="chk done"></span><div class="tx"><div class="a">Sign off preconstruction checklist — PRJ-00004</div><div class="b">Projects</div></div><span class="when">Done</span></div>
+        </section>
+
+        <section class="plain" style="margin-top:26px">
+          <div class="secttl"><h2>Coming up</h2><span class="meta">Next 7 days</span></div>
+          <div class="item"><span class="dot n"></span><div class="tx"><div class="a">Dutch Bros FL1109 — sub numbers due</div><div class="b">Bid deadline</div></div><span class="when">Fri 13</span></div>
+          <div class="item"><span class="dot n"></span><div class="tx"><div class="a">San Antonio — owner walkthrough</div><div class="b">Milestone</div></div><span class="when">Mon 16</span></div>
+          <div class="item"><span class="dot n"></span><div class="tx"><div class="a">Dutch Bros FL1109 — proposal due</div><div class="b">Bid deadline</div></div><span class="when">Tue 17</span></div>
+          <div class="item"><span class="dot n"></span><div class="tx"><div class="a">Quarterly service visit — Lake Nona Medical</div><div class="b">Service contract</div></div><span class="when">Tue 17</span></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
